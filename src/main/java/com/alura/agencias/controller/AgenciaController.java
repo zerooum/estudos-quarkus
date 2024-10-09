@@ -2,6 +2,7 @@ package com.alura.agencias.controller;
 
 import com.alura.agencias.domain.Agencia;
 import com.alura.agencias.service.AgenciaService;
+import jakarta.transaction.Transactional;
 import jakarta.ws.rs.*;
 import jakarta.ws.rs.core.Context;
 import jakarta.ws.rs.core.UriInfo;
@@ -17,9 +18,10 @@ public class AgenciaController {
     }
 
     @POST
+    @Transactional
     public RestResponse<Agencia> cadastrar(Agencia agencia, @Context UriInfo uriInfo) {
-        Agencia novaAgencia = agenciaService.cadastrar(agencia);
-        return RestResponse.created(uriInfo.getAbsolutePathBuilder().path(novaAgencia.getId().toString()).build());
+        agenciaService.cadastrar(agencia);
+        return RestResponse.created(uriInfo.getAbsolutePathBuilder().build());
     }
 
     @GET
@@ -31,12 +33,14 @@ public class AgenciaController {
 
     @DELETE
     @Path("{id}")
+    @Transactional
     public RestResponse<Void> deletar(Long id) {
         this.agenciaService.deletar(id);
         return RestResponse.ok();
     }
 
     @PUT
+    @Transactional
     public RestResponse<Agencia> alterar(Agencia agencia) {
         this.agenciaService.alterar(agencia);
         return RestResponse.ok();
