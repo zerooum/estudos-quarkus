@@ -2,7 +2,7 @@ package com.alura.agencias.domain.http;
 
 public class AgenciaHttp {
 
-    AgenciaHttp(String nome, String razaoSocial, String cnpj, String situacaoCadastral) {
+    public AgenciaHttp(String nome, String razaoSocial, String cnpj, String situacaoCadastral) {
             this.nome = nome;
             this.razaoSocial = razaoSocial;
             this.cnpj = cnpj;

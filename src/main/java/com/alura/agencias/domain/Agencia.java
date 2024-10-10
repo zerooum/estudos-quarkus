@@ -9,7 +9,7 @@ public class Agencia {
 
     }
 
-    Agencia(Integer id, String nome, String razaoSocial, String cnpj, Endereco endereco) {
+    public Agencia(Integer id, String nome, String razaoSocial, String cnpj, Endereco endereco) {
         this.id = id;
         this.nome = nome;
         this.razaoSocial = razaoSocial;
