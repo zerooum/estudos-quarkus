@@ -2,15 +2,14 @@ package com.alura.agencias.service;
 
 import com.alura.agencias.domain.Agencia;
 import com.alura.agencias.domain.http.AgenciaHttp;
-import com.alura.agencias.exception.AgenciaNaoAtivaException;
 import com.alura.agencias.domain.http.SituacaoCadastral;
+import com.alura.agencias.exception.AgenciaNaoAtivaException;
+import com.alura.agencias.exception.AgenciaNaoEncontradaException;
 import com.alura.agencias.repository.AgenciaRepository;
 import com.alura.agencias.service.http.SituacaoCadastralHttpService;
+import io.quarkus.logging.Log;
 import jakarta.enterprise.context.ApplicationScoped;
 import org.eclipse.microprofile.rest.client.inject.RestClient;
-
-import java.util.ArrayList;
-import java.util.List;
 
 @ApplicationScoped
 public class AgenciaService {
@@ -24,15 +23,20 @@ public class AgenciaService {
     @RestClient
     SituacaoCadastralHttpService situacaoCadastralHttpService;
 
-    private final List<Agencia> agencias = new ArrayList<>();
-
     public void cadastrar(Agencia agencia) {
-            AgenciaHttp agenciaHttp = situacaoCadastralHttpService.buscarPorCnpj(agencia.getCnpj());
-            if (agenciaHttp == null) {
-                throw new AgenciaNaoAtivaException();
-            } else {
-                agenciaRepository.persist(agencia);
-        }
+            try {
+                AgenciaHttp agenciaHttp = situacaoCadastralHttpService.buscarPorCnpj(agencia.getCnpj());
+                if(agenciaHttp.getSituacaoCadastral().equals(SituacaoCadastral.ATIVO)) {
+                    Log.info("Agencia com CNPJ " + agencia.getCnpj() + " foi adicionada");
+                    agenciaRepository.persist(agencia);
+                } else {
+                    Log.info("Agencia com CNPJ" + agencia.getCnpj() + " não ativa");
+                    throw new AgenciaNaoAtivaException();
+                }
+            } catch (AgenciaNaoAtivaException | AgenciaNaoEncontradaException e) {
+                Log.warn("Agência não cadastrada");
+                throw e;
+            }
     }
 
     public Agencia buscarPorId(Long id) {
@@ -40,10 +44,12 @@ public class AgenciaService {
     }
 
     public void deletar(Long id) {
+        Log.info("A ageência foi deletada");
         agenciaRepository.deleteById(id);
     }
 
     public void alterar(Agencia agencia) {
+        Log.info("A agência com CNPJ " + agencia.getCnpj() + " foi alterada");
         agenciaRepository.update("nome = ?1, razaoSocial = ?2, cnpj = ?3 where id = ?4", agencia.getNome(), agencia.getRazaoSocial(), agencia.getCnpj(), agencia.getId());
     }
 }
