@@ -3,8 +3,7 @@ package com.alura.agencias.service;
 import com.alura.agencias.domain.Agencia;
 import com.alura.agencias.domain.http.AgenciaHttp;
 import com.alura.agencias.domain.http.SituacaoCadastral;
-import com.alura.agencias.exception.AgenciaNaoAtivaException;
-import com.alura.agencias.exception.AgenciaNaoEncontradaException;
+import com.alura.agencias.exception.AgenciaNaoAtivaOuNaoEncontradaException;
 import com.alura.agencias.repository.AgenciaRepository;
 import com.alura.agencias.service.http.SituacaoCadastralHttpService;
 import io.quarkus.logging.Log;
@@ -24,19 +23,14 @@ public class AgenciaService {
     SituacaoCadastralHttpService situacaoCadastralHttpService;
 
     public void cadastrar(Agencia agencia) {
-            try {
-                AgenciaHttp agenciaHttp = situacaoCadastralHttpService.buscarPorCnpj(agencia.getCnpj());
-                if(agenciaHttp.getSituacaoCadastral().equals(SituacaoCadastral.ATIVO)) {
-                    Log.info("Agencia com CNPJ " + agencia.getCnpj() + " foi adicionada");
-                    agenciaRepository.persist(agencia);
-                } else {
-                    Log.info("Agencia com CNPJ" + agencia.getCnpj() + " não ativa");
-                    throw new AgenciaNaoAtivaException();
-                }
-            } catch (AgenciaNaoAtivaException | AgenciaNaoEncontradaException e) {
-                Log.warn("Agência não cadastrada");
-                throw e;
-            }
+        AgenciaHttp agenciaHttp = situacaoCadastralHttpService.buscarPorCnpj(agencia.getCnpj());
+        if(agenciaHttp != null && agenciaHttp.getSituacaoCadastral().equals(SituacaoCadastral.ATIVO)) {
+            Log.info("Agencia com CNPJ " + agencia.getCnpj() + " foi adicionada");
+            agenciaRepository.persist(agencia);
+        } else {
+            Log.info("Agencia com CNPJ " + agencia.getCnpj() + " não ativa ou não encontrada");
+            throw new AgenciaNaoAtivaOuNaoEncontradaException();
+        }
     }
 
     public Agencia buscarPorId(Long id) {
@@ -44,7 +38,7 @@ public class AgenciaService {
     }
 
     public void deletar(Long id) {
-        Log.info("A ageência foi deletada");
+        Log.info("A agência foi deletada");
         agenciaRepository.deleteById(id);
     }
 

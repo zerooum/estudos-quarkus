@@ -1,7 +1,7 @@
 package com.alura.agencias.services;
 
 import com.alura.agencias.domain.Agencia;
-import com.alura.agencias.exception.AgenciaNaoAtivaException;
+import com.alura.agencias.exception.AgenciaNaoAtivaOuNaoEncontradaException;
 import com.alura.agencias.repository.AgenciaRepository;
 import com.alura.agencias.service.AgenciaService;
 import com.alura.agencias.service.http.SituacaoCadastralHttpService;
@@ -40,7 +40,7 @@ public class AgenciaServiceTest {
     public void deveNaoCadastrarQuandoClientRetornarNull() {
         Mockito.when(situacaoCadastralHttpService.buscarPorCnpj("123")).thenReturn(null);
 
-        Assertions.assertThrows(AgenciaNaoAtivaException.class, () -> agenciaService.cadastrar(agencia));
+        Assertions.assertThrows(AgenciaNaoAtivaOuNaoEncontradaException.class, () -> agenciaService.cadastrar(agencia));
 
         Mockito.verify(agenciaRepository, Mockito.never()).persist(agencia);
     }
