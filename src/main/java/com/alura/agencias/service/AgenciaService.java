@@ -6,6 +6,7 @@ import com.alura.agencias.domain.http.SituacaoCadastral;
 import com.alura.agencias.exception.AgenciaNaoAtivaOuNaoEncontradaException;
 import com.alura.agencias.repository.AgenciaRepository;
 import com.alura.agencias.service.http.SituacaoCadastralHttpService;
+import io.micrometer.core.instrument.MeterRegistry;
 import io.quarkus.logging.Log;
 import jakarta.enterprise.context.ApplicationScoped;
 import org.eclipse.microprofile.rest.client.inject.RestClient;
@@ -14,9 +15,11 @@ import org.eclipse.microprofile.rest.client.inject.RestClient;
 public class AgenciaService {
 
     private final AgenciaRepository agenciaRepository;
+    private final MeterRegistry meterRegistry;
 
-    AgenciaService(AgenciaRepository agenciaRepository) {
+    AgenciaService(AgenciaRepository agenciaRepository, MeterRegistry meterRegistry) {
         this.agenciaRepository = agenciaRepository;
+        this.meterRegistry = meterRegistry;
     }
 
     @RestClient
@@ -29,6 +32,7 @@ public class AgenciaService {
             agenciaRepository.persist(agencia);
         } else {
             Log.info("Agencia com CNPJ " + agencia.getCnpj() + " não ativa ou não encontrada");
+            this.meterRegistry.counter("agencia_nao_adicionada_count").increment();
             throw new AgenciaNaoAtivaOuNaoEncontradaException();
         }
     }
