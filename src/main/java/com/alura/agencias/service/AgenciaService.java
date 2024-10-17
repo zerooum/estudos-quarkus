@@ -28,6 +28,7 @@ public class AgenciaService {
     public void cadastrar(Agencia agencia) {
         AgenciaHttp agenciaHttp = situacaoCadastralHttpService.buscarPorCnpj(agencia.getCnpj());
         if(agenciaHttp != null && agenciaHttp.getSituacaoCadastral().equals(SituacaoCadastral.ATIVO)) {
+            this.meterRegistry.counter("agencia_adicionada_count").increment();
             Log.info("Agencia com CNPJ " + agencia.getCnpj() + " foi adicionada");
             agenciaRepository.persist(agencia);
         } else {
